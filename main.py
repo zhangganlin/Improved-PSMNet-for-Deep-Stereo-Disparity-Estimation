@@ -179,6 +179,7 @@ def main():
             total_train_loss += loss
         print('epoch %d total training loss = %.3f' %
               (epoch, total_train_loss/len(TrainImgLoader)))
+
         loss_to_write.write("{}\n".format(total_train_loss/len(TrainImgLoader)))
 
         # SAVE
@@ -191,7 +192,7 @@ def main():
 
     print('full training time = %.2f HR' %
           ((time.time() - start_full_time)/3600))
-
+    loss_to_write.close()
     # ------------- TEST ------------------------------------------------------------
     total_test_loss = 0
     for batch_idx, (imgL, imgR, disp_L) in enumerate(TestImgLoader):
