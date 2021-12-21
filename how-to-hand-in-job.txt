@@ -1,4 +1,4 @@
-bsub -R "rusage[mem=4000,ngpus_excl_p=1]"  bash run_test.sh 
+bsub -R "rusage[mem=4000,ngpus_excl_p=1]" -W 8:00 bash run_test.sh 
 
 here "mem" is memory (in mb)
 "ngpus_excl_p" is the number of gpu
