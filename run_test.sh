@@ -5,6 +5,8 @@ python main.py --maxdisp 192 \
                --datapath /cluster/scratch/zhangga/dataset/ \
                --epochs 1 \
                --savemodel ./trained/ \
+               --batchsize 8 \
+               --numworker 4 \
                
                #--loadmodel ./trained/checkpoint_10.tar \
 

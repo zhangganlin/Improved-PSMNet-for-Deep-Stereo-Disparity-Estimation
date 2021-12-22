@@ -10,10 +10,10 @@ import torch.nn.functional as F
 import numpy as np
 import time
 import math
-# from dataloader import listflowfile as lt
-# from dataloader import SecenFlowLoader as DA
-from dataloader import KITTIloader2015 as kitti2015
-from dataloader import KITTILoader as DA
+from dataloader import listflowfile as lt
+from dataloader import SecenFlowLoader as DA
+# from dataloader import KITTIloader2015 as kitti2015
+# from dataloader import KITTILoader as DA
 
 from models import *
 
@@ -34,6 +34,11 @@ parser.add_argument('--no-cuda', action='store_true', default=False,
                     help='enables CUDA training')
 parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
+parser.add_argument('--batchsize', type=int, default=2,
+                    help='batch size')
+parser.add_argument('--numworker', type=int, default=0,
+                    help='num_worker')
+
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 
@@ -42,16 +47,16 @@ if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
 # /home/zhangganlin/Desktop/DeepLearning/project/PSMNet/dataset/data_scene_flow_2015/training
-all_left_img, all_right_img, all_left_disp, test_left_img, test_right_img, test_left_disp = kitti2015.dataloader(
+all_left_img, all_right_img, all_left_disp, test_left_img, test_right_img, test_left_disp = lt.dataloader(
     args.datapath)
 
 TrainImgLoader = torch.utils.data.DataLoader(
     DA.myImageFloder(all_left_img, all_right_img, all_left_disp, True),
-    batch_size=2, shuffle=True, num_workers=0, drop_last=False)
+    batch_size=args.batchsize, shuffle=True, num_workers=args.numworker, drop_last=False)
 
-TestImgLoader = torch.utils.data.DataLoader(
-    DA.myImageFloder(test_left_img, test_right_img, test_left_disp, False),
-    batch_size=2, shuffle=False, num_workers=0, drop_last=False)
+# TestImgLoader = torch.utils.data.DataLoader(
+#     DA.myImageFloder(test_left_img, test_right_img, test_left_disp, False),
+#     batch_size=2, shuffle=False, num_workers=0, drop_last=False)
 
 
 if args.model == 'stackhourglass':
@@ -193,6 +198,9 @@ def main():
     print('full training time = %.2f HR' %
           ((time.time() - start_full_time)/3600))
     loss_to_write.close()
+
+
+    return
     # ------------- TEST ------------------------------------------------------------
     total_test_loss = 0
     for batch_idx, (imgL, imgR, disp_L) in enumerate(TestImgLoader):
