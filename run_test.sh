@@ -2,8 +2,8 @@
 
 python main.py --maxdisp 192 \
                --model stackhourglass \
-               --datapath dataset/data_scene_flow_2015/training/ \
-               --epochs 100 \
+               --datapath /cluster/scratch/zhangga/dataset/ \
+               --epochs 1 \
                --savemodel ./trained/ \
                
                #--loadmodel ./trained/checkpoint_10.tar \
