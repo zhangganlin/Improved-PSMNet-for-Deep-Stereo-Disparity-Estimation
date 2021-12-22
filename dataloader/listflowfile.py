@@ -85,8 +85,11 @@ def dataloader(filepath):
     driving_dir = filepath + [x for x in image if 'driving' in x][0] + '/'
     driving_disp = filepath + [x for x in disp if 'driving' in x][0]
 
-    subdir1 = ['35mm_focallength','15mm_focallength']
-    subdir2 = ['scene_backwards','scene_forwards']
+    # subdir1 = ['35mm_focallength','15mm_focallength']
+    # subdir2 = ['scene_backwards','scene_forwards']
+
+    subdir1 = ['35mm_focallength']
+    subdir2 = ['scene_forwards']
     subdir3 = ['fast','slow']
 
     for i in subdir1:
