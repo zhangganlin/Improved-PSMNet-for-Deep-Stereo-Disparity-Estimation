@@ -31,4 +31,4 @@ bash run_test.sh
 ```
 
 ## Euler Cluster
-Some notes about how to train the network are listed in ```how-to-hand-in-job.txt```
+Some notes about how to train the network are listed in [how-to-hand-in-job.md](how-to-hand-in-job.md)
