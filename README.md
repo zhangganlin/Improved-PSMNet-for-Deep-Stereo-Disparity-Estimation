@@ -2,6 +2,15 @@
 
 This repository contains the code of Deep Learning course project.
 
+## Conda Virtual Environment
+```
+conda env create -f deep-learning-env.yaml
+```
+Activate the conda environment before run the code.
+```
+conda activate deep-learning
+```
+
 ## Dataset
 * KITTI stereo 2015
 * KITTI stereo 2012
@@ -25,10 +34,10 @@ Improved-PSMNet-for-Deep-Stereo-Disparity-Estimation
 ```
 
 ## Test
-When test the network, run
+Make sure that the GPU is available. When test the network, run
 ```bash
 bash run_test.sh
 ```
 
 ## Euler Cluster
-Some notes about how to train the network are listed in [how-to-hand-in-job.md](how-to-hand-in-job.md)
+Some notes about how to train the network on ETHZ's Euler Cluster are listed in [how-to-hand-in-job.md](how-to-hand-in-job.md)
