@@ -34,6 +34,11 @@ parser.add_argument('--no-cuda', action='store_true', default=False,
                     help='enables CUDA training')
 parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
+parser.add_argument('--batchsize', type=int, default=2,
+                    help='batch size')
+parser.add_argument('--numworker', type=int, default=0,
+                    help='num_worker')
+
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 
@@ -47,7 +52,7 @@ all_left_img, all_right_img, all_left_disp, test_left_img, test_right_img, test_
 
 TrainImgLoader = torch.utils.data.DataLoader(
     DA.myImageFloder(all_left_img, all_right_img, all_left_disp, True),
-    batch_size=2, shuffle=True, num_workers=0, drop_last=False)
+    batch_size=args.batchsize, shuffle=True, num_workers=args.numworker, drop_last=False)
 
 # TestImgLoader = torch.utils.data.DataLoader(
 #     DA.myImageFloder(test_left_img, test_right_img, test_left_disp, False),
