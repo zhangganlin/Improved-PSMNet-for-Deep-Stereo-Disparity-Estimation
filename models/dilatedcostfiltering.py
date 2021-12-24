@@ -11,11 +11,11 @@ class dilated_sub(nn.Module):
     def __init__(self, inplanes):
         super(dilated_sub, self).__init__()
 
-        self.conv0 = nn.Sequential(convbn_3d(inplanes, inplanes, 3, 2, 1),
-                                   nn.ReLU(inplace=True))
+        self.conv0 = nn.Sequential(convbn_3d(inplanes, inplanes, 3, 2, 1),        
+                                   nn.ReLU(inplace=True))                             #39
 
         self.conv1 = nn.Sequential(convbn_3d(inplanes, inplanes, 3, 1, 1),
-                                   nn.ReLU(inplace=True))
+                                   nn.ReLU(inplace=True))                             #40
 
         self.conv2_1 = nn.Sequential(convbn_3d(inplanes, inplanes, kernel_size=3, stride=1, pad=1),
                                    nn.ReLU(inplace=True))
@@ -36,8 +36,9 @@ class dilated_sub(nn.Module):
 
     def forward(self, x, last):
         out_1 = self.conv0(x)
-        out_1 = self.conv1(out_1)+last
         out_2 = self.conv3_cat(torch.cat((self.conv2_1(out_1),self.conv2_2(out_1),self.conv2_3(out_1)),1))
+        out_1 = self.conv1(out_1)+last
+        
         out_2 = self.deconv(out_2)
         out_3 = self.pred_conv(out_2)
         return out_1,out_2,out_3
