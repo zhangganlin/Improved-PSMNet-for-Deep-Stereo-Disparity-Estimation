@@ -63,6 +63,8 @@ if args.model == 'stackhourglass':
     model = stackhourglass(args.maxdisp,args.cuda)
 elif args.model == 'basic':
     model = basic(args.maxdisp)
+elif args.model == 'dilated':
+    model = dilated(args.maxdisp,args.cuda)
 else:
     print('no model')
 
@@ -94,7 +96,7 @@ def train(imgL, imgR, disp_L):
     # ----
     optimizer.zero_grad()
 
-    if args.model == 'stackhourglass':
+    if args.model == 'stackhourglass' or args.model == 'dilated':
         output1, output2, output3 = model(imgL, imgR)
         output1 = torch.squeeze(output1, 1)
         output2 = torch.squeeze(output2, 1)
@@ -106,6 +108,8 @@ def train(imgL, imgR, disp_L):
         output = torch.squeeze(output, 1)
         loss = F.smooth_l1_loss(
             output[mask], disp_true[mask], size_average=True)
+
+
 
     loss.backward()
     optimizer.step()

@@ -13,9 +13,9 @@ def convbn(in_planes, out_planes, kernel_size, stride, pad, dilation):
                          nn.BatchNorm2d(out_planes))
 
 
-def convbn_3d(in_planes, out_planes, kernel_size, stride, pad):
+def convbn_3d(in_planes, out_planes, kernel_size, stride, pad, dil=1):
 
-    return nn.Sequential(nn.Conv3d(in_planes, out_planes, kernel_size=kernel_size, padding=pad, stride=stride,bias=False),
+    return nn.Sequential(nn.Conv3d(in_planes, out_planes, kernel_size=kernel_size, padding=pad, stride=stride,bias=False, dilation=dil),
                          nn.BatchNorm3d(out_planes))
 
 class BasicBlock(nn.Module):
