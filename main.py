@@ -60,7 +60,7 @@ TrainImgLoader = torch.utils.data.DataLoader(
 
 
 if args.model == 'stackhourglass':
-    model = stackhourglass(args.maxdisp)
+    model = stackhourglass(args.maxdisp,args.cuda)
 elif args.model == 'basic':
     model = basic(args.maxdisp)
 else:
