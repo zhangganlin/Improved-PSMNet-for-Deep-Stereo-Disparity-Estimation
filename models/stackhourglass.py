@@ -50,15 +50,19 @@ class hourglass(nn.Module):
         return out, pre, post
 
 class PSMNet(nn.Module):
-    def __init__(self, maxdisp, gpu=True):
+    def __init__(self, maxdisp, gpu=True, num_groups = 40, concat_channels=12):
         super(PSMNet, self).__init__()
         self.maxdisp = maxdisp
 
         self.gpu = gpu
 
-        self.feature_extraction = feature_extraction()
+        self.num_groups = num_groups
 
-        self.dres0 = nn.Sequential(convbn_3d(64, 32, 3, 1, 1),
+        self.concat_channels = concat_channels   #cost volume channels: num_groups + 2*concat_channels
+
+        self.feature_extraction = feature_extraction(self.concat_channels)
+
+        self.dres0 = nn.Sequential(convbn_3d(self.num_groups + self.concat_channels*2, 32, 3, 1, 1),
                                      nn.ReLU(inplace=True),
                                      convbn_3d(32, 32, 3, 1, 1),
                                      nn.ReLU(inplace=True))
@@ -104,27 +108,31 @@ class PSMNet(nn.Module):
 
     def forward(self, left, right):
 
-        refimg_fea     = self.feature_extraction(left)
-        targetimg_fea  = self.feature_extraction(right)
+        refimg_fea, refimg_fea_gwc = self.feature_extraction(left)
+        targetimg_fea, targetimg_fea_gwc = self.feature_extraction(right)
 
 
         #matching
 
-        if self.gpu:
-            cost = Variable(torch.FloatTensor(refimg_fea.size()[0], refimg_fea.size()[1]*2, self.maxdisp//4,  refimg_fea.size()[2],  refimg_fea.size()[3]).zero_()).cuda()
-        else:
-            cost = Variable(torch.FloatTensor(refimg_fea.size()[0], refimg_fea.size()[1]*2, self.maxdisp//4,  refimg_fea.size()[2],  refimg_fea.size()[3]).zero_())
+        # if self.gpu:
+        #     cost = Variable(torch.FloatTensor(refimg_fea.size()[0], refimg_fea.size()[1]*2, self.maxdisp//4,  refimg_fea.size()[2],  refimg_fea.size()[3]).zero_()).cuda()
+        # else:
+        #     cost = Variable(torch.FloatTensor(refimg_fea.size()[0], refimg_fea.size()[1]*2, self.maxdisp//4,  refimg_fea.size()[2],  refimg_fea.size()[3]).zero_())
 
-        for i in range(self.maxdisp//4):
-            if i > 0 :
-             cost[:, :refimg_fea.size()[1], i, :,i:]   = refimg_fea[:,:,:,i:]
-             cost[:, refimg_fea.size()[1]:, i, :,i:] = targetimg_fea[:,:,:,:-i]
-            else:
-             cost[:, :refimg_fea.size()[1], i, :,:]   = refimg_fea
-             cost[:, refimg_fea.size()[1]:, i, :,:]   = targetimg_fea
-        cost = cost.contiguous()
+        # for i in range(self.maxdisp//4):
+        #     if i > 0 :
+        #      cost[:, :refimg_fea.size()[1], i, :,i:]   = refimg_fea[:,:,:,i:]
+        #      cost[:, refimg_fea.size()[1]:, i, :,i:] = targetimg_fea[:,:,:,:-i]
+        #     else:
+        #      cost[:, :refimg_fea.size()[1], i, :,:]   = refimg_fea
+        #      cost[:, refimg_fea.size()[1]:, i, :,:]   = targetimg_fea
+        # cost = cost.contiguous()
 
-        cost0 = self.dres0(cost)
+        gwc_volume = build_gwc_volume(refimg_fea_gwc, targetimg_fea_gwc, self.maxdisp // 4, self.num_groups)
+        concat_volume = build_concat_volume(refimg_fea, targetimg_fea, self.maxdisp // 4)
+        volume = torch.cat((gwc_volume, concat_volume), 1)
+
+        cost0 = self.dres0(volume)
         cost0 = self.dres1(cost0) + cost0
 
         out1, pre1, post1 = self.dres2(cost0, None, None) 

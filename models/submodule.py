@@ -56,8 +56,9 @@ class disparityregression(nn.Module):
         return out
 
 class feature_extraction(nn.Module):
-    def __init__(self):
+    def __init__(self, concat_channels = 32):
         super(feature_extraction, self).__init__()
+        self.concat_channels = concat_channels
         self.inplanes = 32
         self.firstconv = nn.Sequential(convbn(3, 32, 3, 2, 1, 1),   #conv0_1
                                        nn.ReLU(inplace=True),
@@ -89,7 +90,7 @@ class feature_extraction(nn.Module):
 
         self.lastconv = nn.Sequential(convbn(320, 128, 3, 1, 1, 1),
                                       nn.ReLU(inplace=True),
-                                      nn.Conv2d(128, 32, kernel_size=1, padding=0, stride = 1, bias=False))
+                                      nn.Conv2d(128, concat_channels, kernel_size=1, padding=0, stride = 1, bias=False))
 
     def _make_layer(self, block, planes, blocks, stride, pad, dilation):
         downsample = None
@@ -127,10 +128,44 @@ class feature_extraction(nn.Module):
         output_branch4 = self.branch4(output_skip)
         output_branch4 = F.upsample(output_branch4, (output_skip.size()[2],output_skip.size()[3]),mode='bilinear')
 
-        output_feature = torch.cat((output_raw, output_skip, output_branch4, output_branch3, output_branch2, output_branch1), 1)
-        output_feature = self.lastconv(output_feature)
+        gwc_feature = torch.cat((output_raw, output_skip, output_branch4, output_branch3, output_branch2, output_branch1), 1)
+        concat_feature = self.lastconv(gwc_feature)
 
-        return output_feature
+        return  concat_feature, gwc_feature
 
 
 
+def build_concat_volume(refimg_fea, targetimg_fea, maxdisp):
+    B, C, H, W = refimg_fea.shape
+    volume = refimg_fea.new_zeros([B, 2 * C, maxdisp, H, W])
+    for i in range(maxdisp):
+        if i > 0:
+            volume[:, :C, i, :, i:] = refimg_fea[:, :, :, i:]
+            volume[:, C:, i, :, i:] = targetimg_fea[:, :, :, :-i]
+        else:
+            volume[:, :C, i, :, :] = refimg_fea
+            volume[:, C:, i, :, :] = targetimg_fea
+    volume = volume.contiguous()
+    return volume
+
+
+def groupwise_correlation(fea1, fea2, num_groups):
+    B, C, H, W = fea1.shape
+    assert C % num_groups == 0
+    channels_per_group = C // num_groups
+    cost = (fea1 * fea2).view([B, num_groups, channels_per_group, H, W]).mean(dim=2)
+    assert cost.shape == (B, num_groups, H, W)
+    return cost
+
+
+def build_gwc_volume(refimg_fea, targetimg_fea, maxdisp, num_groups):
+    B, C, H, W = refimg_fea.shape
+    volume = refimg_fea.new_zeros([B, num_groups, maxdisp, H, W])
+    for i in range(maxdisp):
+        if i > 0:
+            volume[:, :, i, :, i:] = groupwise_correlation(refimg_fea[:, :, :, i:], targetimg_fea[:, :, :, :-i],
+                                                           num_groups)
+        else:
+            volume[:, :, i, :, :] = groupwise_correlation(refimg_fea, targetimg_fea, num_groups)
+    volume = volume.contiguous()
+    return volume
