@@ -68,6 +68,8 @@ elif args.model == 'dilated':
 else:
     print('no model')
 
+
+
 if args.cuda:
     model = nn.DataParallel(model)
     model.cuda()
@@ -81,6 +83,8 @@ print('Number of model parameters: {}'.format(
     sum([p.data.nelement() for p in model.parameters()])))
 
 optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999))
+
+
 
 
 def train(imgL, imgR, disp_L):
@@ -169,7 +173,7 @@ def adjust_learning_rate(optimizer, epoch):
 
 def main():
 
-    loss_to_write = open("loss.txt","w")
+    loss_to_write = open(args.savemodel+"/loss.txt","w")
 
 
     start_full_time = time.time()
