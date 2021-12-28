@@ -80,10 +80,13 @@ class PSMNet(nn.Module):
                                       nn.ReLU(inplace=True),
                                       nn.Conv3d(32, 1, kernel_size=3, padding=1, stride=1,bias=False))
 
-        self.final_conv = nn.Sequential(convbn(2,16,3,1,1,1),
+        self.final_conv = nn.Sequential(convbn(2,8,3,1,1,1),
                                         nn.ReLU(inplace=True),
-                                        convbn(16,1,3,1,1,1),
-                                        nn.ReLU(inplace=True))
+                                        convbn(8,8,3,1,1,1),
+                                        nn.ReLU(inplace=True),
+                                        convbn(8,8,3,1,1,1),
+                                        nn.ReLU(inplace=True),
+                                        nn.Conv2d(8,1,3,1,1,1))
 
 
         for m in self.modules():
