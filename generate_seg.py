@@ -82,7 +82,7 @@ cfg.MODEL.weights_decoder = os.path.join(
     cfg.DIR, 'decoder_' + cfg.TEST.checkpoint)
 
 assert os.path.exists(cfg.MODEL.weights_encoder) and \
-    os.path.exists(cfg.MODEL.weights_decoder), "checkpoint does not exitst!"
+    os.path.exists(cfg.MODEL.weights_decoder), "checkpoint does not exist!"
 
 if gpu != -1:
     torch.cuda.set_device(gpu)
@@ -123,7 +123,6 @@ def generate_seg(src_folder, save_folder):
         num_workers=4,
         drop_last=True)
     if gpu != -1:
-        segmentation_module = nn.DataParallel(segmentation_module)
         segmentation_module.cuda()
         
     segmentation_module.eval()
