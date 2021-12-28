@@ -102,11 +102,11 @@ crit = nn.NLLLoss(ignore_index=-1)
 segmentation_module = SegmentationModule(net_encoder, net_decoder, crit)
 
 
-def generate_seg(src_folder, save_folder):
+def generate_seg(src_folder, save_folder, ext):
     
     global segmentation_module
     
-    imgs = find_recursive(src_folder,".png")
+    imgs = find_recursive(src_folder,ext)
     cfg.list_test = [{'fpath_img': x} for x in imgs]
     cfg.TEST.result = save_folder
     if not os.path.isdir(cfg.TEST.result):
@@ -174,5 +174,23 @@ src_folder_kitti12 = args.kitti12+"/colored_0"
 result_folder_kitti15 = args.kitti15+"/seg"
 result_folder_kitti12 = args.kitti12+"/seg"
 
-generate_seg(src_folder_kitti15, result_folder_kitti15)
-generate_seg(src_folder_kitti12, result_folder_kitti12)
+# generate_seg(src_folder_kitti15, result_folder_kitti15, ".png")
+# generate_seg(src_folder_kitti12, result_folder_kitti12, ".png")
+
+
+subdir1 = ['35mm_focallength']
+subdir2 = ['scene_forwards']
+subdir3 = ['fast','slow']
+
+src_folders_driving = []
+
+for i in subdir1:
+    for j in subdir2:
+        for k in subdir3:
+            folder = "dataset"+'/driving_frame_cleanpass/'+i+'/'+j+'/'+k+'/left/'
+            src_folders_driving.append(folder)
+
+result_folders_driving = [folder.replace('frame_cleanpass', 'seg') for folder in src_folders_driving]
+
+for i in range(len(src_folders_driving)):
+    generate_seg(src_folders_driving[i], result_folders_driving[i], ".png")
