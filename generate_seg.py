@@ -128,6 +128,8 @@ def generate_seg(src_folder, save_folder):
     segmentation_module.eval()
 
 
+    pbar = tqdm(total=len(loader_test))
+
     for batch_data in loader_test:
         # process data
         batch_data = batch_data[0]
@@ -162,6 +164,7 @@ def generate_seg(src_folder, save_folder):
             pred,
             cfg
         )
+        pbar.update(1)
 
 
 
