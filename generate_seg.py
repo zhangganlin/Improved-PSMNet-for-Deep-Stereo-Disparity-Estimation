@@ -187,7 +187,7 @@ src_folders_driving = []
 for i in subdir1:
     for j in subdir2:
         for k in subdir3:
-            folder = "dataset"+'/driving_frame_cleanpass/'+i+'/'+j+'/'+k+'/left/'
+            folder = args.driving+'/driving_frame_cleanpass/'+i+'/'+j+'/'+k+'/left/'
             src_folders_driving.append(folder)
 
 result_folders_driving = [folder.replace('frame_cleanpass', 'seg') for folder in src_folders_driving]
