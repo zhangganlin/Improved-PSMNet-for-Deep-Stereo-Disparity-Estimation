@@ -54,16 +54,14 @@ TrainImgLoader = torch.utils.data.DataLoader(
     DA.myImageFloder(all_left_img, all_right_img, all_left_disp, True),
     batch_size=args.batchsize, shuffle=True, num_workers=args.numworker, drop_last=False)
 
-# TestImgLoader = torch.utils.data.DataLoader(
-#     DA.myImageFloder(test_left_img, test_right_img, test_left_disp, False),
-#     batch_size=2, shuffle=False, num_workers=0, drop_last=False)
+TestImgLoader = torch.utils.data.DataLoader(
+    DA.myImageFloder(test_left_img, test_right_img, test_left_disp, False),
+    batch_size=2, shuffle=False, num_workers=0, drop_last=False)
 
 
-if args.model == 'stackhourglass':
+if 'stackhourglass' in args.model:
     model = stackhourglass(args.maxdisp,args.cuda)
-elif args.model == 'basic':
-    model = basic(args.maxdisp)
-elif args.model == 'dilated':
+elif 'dilated' in args.model:
     model = dilated(args.maxdisp,args.cuda)
 else:
     print('no model')
@@ -100,18 +98,20 @@ def train(imgL, imgR, disp_L):
     # ----
     optimizer.zero_grad()
 
-    if args.model == 'stackhourglass' or args.model == 'dilated':
+    if "seg" in args.model:
+        output = model(imgL, imgR)
+        output = torch.squeeze(output, 1)
+        loss = F.smooth_l1_loss(
+            output[mask], disp_true[mask], size_average=True)
+
+    elif args.model == 'stackhourglass' or args.model == 'dilated':
         output1, output2, output3 = model(imgL, imgR)
         output1 = torch.squeeze(output1, 1)
         output2 = torch.squeeze(output2, 1)
         output3 = torch.squeeze(output3, 1)
         loss = 0.5*F.smooth_l1_loss(output1[mask], disp_true[mask], size_average=True) + 0.7*F.smooth_l1_loss(
             output2[mask], disp_true[mask], size_average=True) + F.smooth_l1_loss(output3[mask], disp_true[mask], size_average=True)
-    elif args.model == 'basic':
-        output = model(imgL, imgR)
-        output = torch.squeeze(output, 1)
-        loss = F.smooth_l1_loss(
-            output[mask], disp_true[mask], size_average=True)
+    
 
 
 
@@ -171,7 +171,7 @@ def adjust_learning_rate(optimizer, epoch):
         param_group['lr'] = lr
 
 
-def main():
+def main_train():
 
     loss_to_write = open(args.savemodel+"/loss.txt","w")
 
@@ -206,9 +206,9 @@ def main():
     print('full training time = %.2f HR' %
           ((time.time() - start_full_time)/3600))
     loss_to_write.close()
-
-
     return
+
+def main_test():
     # ------------- TEST ------------------------------------------------------------
     total_test_loss = 0
     for batch_idx, (imgL, imgR, disp_L) in enumerate(TestImgLoader):
@@ -226,4 +226,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main_train()

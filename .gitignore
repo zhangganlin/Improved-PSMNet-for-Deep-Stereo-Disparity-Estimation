@@ -3,3 +3,4 @@ dataset/*
 lsf*
 *.tar
 *.png
+trained/*

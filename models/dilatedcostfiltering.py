@@ -100,26 +100,13 @@ class PSMNet(nn.Module):
         refimg_fea, refimg_fea_gwc = self.feature_extraction(left)
         targetimg_fea, targetimg_fea_gwc = self.feature_extraction(right)
 
-
-        #matching
-
-        # if self.gpu:
-        #     cost = Variable(torch.FloatTensor(refimg_fea.size()[0], refimg_fea.size()[1]*2, self.maxdisp//4,  refimg_fea.size()[2],  refimg_fea.size()[3]).zero_()).cuda()
-        # else:
-        #     cost = Variable(torch.FloatTensor(refimg_fea.size()[0], refimg_fea.size()[1]*2, self.maxdisp//4,  refimg_fea.size()[2],  refimg_fea.size()[3]).zero_())
-
-        # for i in range(self.maxdisp//4):
-        #     if i > 0 :
-        #      cost[:, :refimg_fea.size()[1], i, :,i:]   = refimg_fea[:,:,:,i:]
-        #      cost[:, refimg_fea.size()[1]:, i, :,i:] = targetimg_fea[:,:,:,:-i]
-        #     else:
-        #      cost[:, :refimg_fea.size()[1], i, :,:]   = refimg_fea
-        #      cost[:, refimg_fea.size()[1]:, i, :,:]   = targetimg_fea
-        # cost = cost.contiguous()
-
-        gwc_volume = build_gwc_volume(refimg_fea_gwc, targetimg_fea_gwc, self.maxdisp // 4, self.num_groups)
-        concat_volume = build_concat_volume(refimg_fea, targetimg_fea, self.maxdisp // 4)
-        volume = torch.cat((gwc_volume, concat_volume), 1)
+        if self.num_groups == 0:
+            concat_volume = build_concat_volume(refimg_fea, targetimg_fea, self.maxdisp // 4)
+            volume = concat_volume
+        else:
+            gwc_volume = build_gwc_volume(refimg_fea_gwc, targetimg_fea_gwc, self.maxdisp // 4, self.num_groups)
+            concat_volume = build_concat_volume(refimg_fea, targetimg_fea, self.maxdisp // 4)
+            volume = torch.cat((gwc_volume, concat_volume), 1)
 
         layer38_out = self.layer37_38(volume)
         B,C,H,W,D = layer38_out.shape
