@@ -42,6 +42,8 @@ parser.add_argument('--seg', type=bool, default=True,
                     help='Whether add segmentation')
 parser.add_argument('--gwc', type=bool, default=True,
                     help='Whether use group wise cost volume')
+parser.add_argument('--startepoch', type=int, default=0,
+                    help='start from epoch')
 
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
@@ -183,12 +185,14 @@ def adjust_learning_rate(optimizer, epoch):
 
 
 def main_train():
-
-    loss_to_write = open(args.savemodel+"/loss.txt","w")
+    if args.startepoch != 0:
+        loss_to_write = open(args.savemodel+"/"+str(args.startepoch)+"loss.txt","w")
+    else:   
+        loss_to_write = open(args.savemodel+"/loss.txt","w")
 
 
     start_full_time = time.time()
-    for epoch in range(0, args.epochs):
+    for epoch in range(args.startepoch, args.startepoch+args.epochs):
         print('This is %d-th epoch' % (epoch))
         total_train_loss = 0
         adjust_learning_rate(optimizer, epoch)
