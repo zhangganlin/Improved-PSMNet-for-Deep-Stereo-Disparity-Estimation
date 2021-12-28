@@ -8,7 +8,9 @@ import torch
 import torch.nn as nn
 from scipy.io import loadmat
 import csv
-os.chdir("semantic_segmentation")
+import sys
+sys.path
+sys.path.append('semantic_segmentation')
 from mit_semseg.dataset import TestDataset
 from mit_semseg.models import ModelBuilder, SegmentationModule
 from mit_semseg.utils import colorEncode, find_recursive, setup_logger
@@ -17,7 +19,6 @@ from mit_semseg.lib.utils import as_numpy
 from PIL import Image
 from tqdm import tqdm
 from mit_semseg.config import cfg
-os.chdir("..")
 
 
 
