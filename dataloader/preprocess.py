@@ -53,8 +53,8 @@ def pad_random_crop(input_size, scale_size=None, normalize=__imagenet_stats):
 
 def inception_preproccess(input_size, normalize=__imagenet_stats):
     return transforms.Compose([
-        transforms.RandomSizedCrop(input_size),
-        transforms.RandomHorizontalFlip(),
+        # transforms.RandomSizedCrop(input_size),
+        # transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize(**normalize)
     ])

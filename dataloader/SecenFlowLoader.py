@@ -25,11 +25,12 @@ def disparity_loader(path):
     return rp.readPFM(path)
 
 class myImageFloder(data.Dataset):
-    def __init__(self, left, right, left_disparity, training, loader=default_loader, dploader= disparity_loader):
+    def __init__(self, left, right, left_disparity, left_seg, training, loader=default_loader, dploader= disparity_loader):
  
         self.left = left
         self.right = right
         self.disp_L = left_disparity
+        self.seg_L = left_seg
         self.loader = loader
         self.dploader = dploader
         self.training = training
@@ -38,10 +39,11 @@ class myImageFloder(data.Dataset):
         left  = self.left[index]
         right = self.right[index]
         disp_L= self.disp_L[index]
-
+        seg_L = self.seg_L[index]
 
         left_img = self.loader(left)
         right_img = self.loader(right)
+        seg_img = Image.open(seg_L)
         dataL, scaleL = self.dploader(disp_L)
         dataL = np.ascontiguousarray(dataL,dtype=np.float32)
 
@@ -54,19 +56,21 @@ class myImageFloder(data.Dataset):
 
             left_img = left_img.crop((x1, y1, x1 + tw, y1 + th))
             right_img = right_img.crop((x1, y1, x1 + tw, y1 + th))
-
+            seg_img = seg_img.crop((x1, y1, x1 + tw, y1 + th))
             dataL = dataL[y1:y1 + th, x1:x1 + tw]
 
             processed = preprocess.get_transform(augment=False)  
             left_img   = processed(left_img)
             right_img  = processed(right_img)
+            seg_img = transforms.ToTensor()(seg_img)
 
-            return left_img, right_img, dataL
+            return left_img, right_img, dataL, seg_img
         else:
             processed = preprocess.get_transform(augment=False)  
             left_img       = processed(left_img)
             right_img      = processed(right_img) 
-            return left_img, right_img, dataL
+            seg_img        = transforms.ToTensor()(seg_img)
+            return left_img, right_img, dataL, seg_img
 
     def __len__(self):
         return len(self.left)

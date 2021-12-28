@@ -18,6 +18,7 @@ def dataloader(filepath):
     classes = [d for d in os.listdir(filepath) if os.path.isdir(os.path.join(filepath, d))]
     image = [img for img in classes if img.find('cleanpass') > -1]
     disp  = [dsp for dsp in classes if dsp.find('disparity') > -1]
+    seg   = [seg for seg in classes if seg.find('seg') > -1]
 
     # monkaa_path = filepath + [x for x in image if 'monkaa' in x][0]
     # monkaa_disp = filepath + [x for x in disp if 'monkaa' in x][0]
@@ -28,10 +29,12 @@ def dataloader(filepath):
     all_left_img=[]
     all_right_img=[]
     all_left_disp = []
+    all_left_seg = []
+
     test_left_img=[]
     test_right_img=[]
     test_left_disp = []
-
+    test_left_seg = []
 
     # for dd in monkaa_dir:
     #   for im in os.listdir(monkaa_path+'/'+dd+'/left/'):
@@ -84,6 +87,7 @@ def dataloader(filepath):
 
     driving_dir = filepath + [x for x in image if 'driving' in x][0] + '/'
     driving_disp = filepath + [x for x in disp if 'driving' in x][0]
+    driving_seg = filepath + [x for x in seg if 'driving' in x][0]
 
     # subdir1 = ['35mm_focallength','15mm_focallength']
     # subdir2 = ['scene_backwards','scene_forwards']
@@ -101,11 +105,12 @@ def dataloader(filepath):
                 all_left_img.append(driving_dir+i+'/'+j+'/'+k+'/left/'+im)
 
               all_left_disp.append(driving_disp+'/'+i+'/'+j+'/'+k+'/left/'+im.split(".")[0]+'.pfm')
+              all_left_seg.append(driving_seg+'/'+i+'/'+j+'/'+k+'/left/'+im.split(".")[0]+'.png')
 
               if is_image_file(driving_dir+i+'/'+j+'/'+k+'/right/'+im):
                 all_right_img.append(driving_dir+i+'/'+j+'/'+k+'/right/'+im)
 
 
-    return all_left_img, all_right_img, all_left_disp, test_left_img, test_right_img, test_left_disp
+    return all_left_img, all_right_img, all_left_disp, test_left_img, test_right_img, test_left_disp, all_left_seg, test_left_seg
 
 

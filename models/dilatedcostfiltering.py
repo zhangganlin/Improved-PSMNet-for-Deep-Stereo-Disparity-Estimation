@@ -44,9 +44,11 @@ class dilated_sub(nn.Module):
         return out_1,out_2,out_3
 
 class PSMNet(nn.Module):
-    def __init__(self, maxdisp, gpu=True, num_groups = 40, concat_channels=12):
+    def __init__(self, maxdisp, gpu=True, num_groups = 40, concat_channels=12, seg=False):
         super(PSMNet, self).__init__()
         self.maxdisp = maxdisp
+
+        self.seg = seg
 
         self.gpu = gpu
 
@@ -78,6 +80,12 @@ class PSMNet(nn.Module):
                                       nn.ReLU(inplace=True),
                                       nn.Conv3d(32, 1, kernel_size=3, padding=1, stride=1,bias=False))
 
+        self.final_conv = nn.Sequential(convbn(2,16,3,1,1,1),
+                                        nn.ReLU(inplace=True),
+                                        convbn(16,1,3,1,1,1),
+                                        nn.ReLU(inplace=True))
+
+
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
@@ -95,7 +103,7 @@ class PSMNet(nn.Module):
                 m.bias.data.zero_()
 
 
-    def forward(self, left, right):
+    def forward(self, left, right, seg):
 
         refimg_fea, refimg_fea_gwc = self.feature_extraction(left)
         targetimg_fea, targetimg_fea_gwc = self.feature_extraction(right)
@@ -144,6 +152,16 @@ class PSMNet(nn.Module):
         pred3 = disparityregression(self.maxdisp,self.gpu)(pred3)
 
         if self.training:
-            return pred1, pred2, pred3
+            if self.seg==False:
+                return pred1, pred2, pred3
+            else:
+                pred1 = self.final_conv(torch.cat((pred1, seg), 1))
+                pred2 = self.final_conv(torch.cat((pred2, seg), 1))
+                pred3 = self.final_conv(torch.cat((pred3, seg), 1))
+                return pred1, pred2, pred3
         else:
-            return pred3
+            if self.seg == False:
+                return pred3
+            else:
+                pred3 = self.final_conv(torch.cat((pred3, seg), 1))
+                return pred3

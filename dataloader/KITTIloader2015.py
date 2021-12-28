@@ -20,6 +20,7 @@ def dataloader(filepath):
     right_fold = 'image_3/'
     disp_L = 'disp_occ_0/'
     disp_R = 'disp_occ_1/'
+    seg_fold = 'seg/'
 
     image = [img for img in os.listdir(filepath+left_fold) if img.find('_10') > -1]
 
@@ -30,10 +31,12 @@ def dataloader(filepath):
     right_train = [filepath+right_fold+img for img in train]
     disp_train_L = [filepath+disp_L+img for img in train]
     #disp_train_R = [filepath+disp_R+img for img in train]
+    seg_train = [filepath+seg_fold+img for img in train]
 
     left_val  = [filepath+left_fold+img for img in val]
     right_val = [filepath+right_fold+img for img in val]
     disp_val_L = [filepath+disp_L+img for img in val]
     #disp_val_R = [filepath+disp_R+img for img in val]
+    seg_val = [filepath+seg_fold+img for img in val]
 
-    return left_train, right_train, disp_train_L, left_val, right_val, disp_val_L
+    return left_train, right_train, disp_train_L, left_val, right_val, disp_val_L, seg_train, seg_val

@@ -38,6 +38,10 @@ parser.add_argument('--batchsize', type=int, default=2,
                     help='batch size')
 parser.add_argument('--numworker', type=int, default=0,
                     help='num_worker')
+parser.add_argument('--seg', type=bool, default=True,
+                    help='Whether add segmentation')
+parser.add_argument('--gwc', type=bool, default=True,
+                    help='Whether use group wise cost volume')
 
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
@@ -47,22 +51,29 @@ if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
 # /home/zhangganlin/Desktop/DeepLearning/project/PSMNet/dataset/data_scene_flow_2015/training
-all_left_img, all_right_img, all_left_disp, test_left_img, test_right_img, test_left_disp = lt.dataloader(
+all_left_img, all_right_img, all_left_disp, test_left_img, test_right_img, test_left_disp, all_left_seg, test_left_seg = lt.dataloader(
     args.datapath)
 
 TrainImgLoader = torch.utils.data.DataLoader(
-    DA.myImageFloder(all_left_img, all_right_img, all_left_disp, True),
+    DA.myImageFloder(all_left_img, all_right_img, all_left_disp, all_left_seg, True),
     batch_size=args.batchsize, shuffle=True, num_workers=args.numworker, drop_last=False)
 
 TestImgLoader = torch.utils.data.DataLoader(
-    DA.myImageFloder(test_left_img, test_right_img, test_left_disp, False),
+    DA.myImageFloder(test_left_img, test_right_img, test_left_disp, test_left_seg, False),
     batch_size=2, shuffle=False, num_workers=0, drop_last=False)
 
+if args.gwc:
+    num_groups = 40
+    concat_channels=12
+else:
+    num_groups = 0
+    concat_channels = 32
 
-if 'stackhourglass' in args.model:
-    model = stackhourglass(args.maxdisp,args.cuda)
-elif 'dilated' in args.model:
-    model = dilated(args.maxdisp,args.cuda)
+
+if args.model == 'stackhourglass':
+    model = stackhourglass(args.maxdisp,args.cuda, num_groups, concat_channels, seg=args.seg)
+elif args.model == 'dilated':
+    model = dilated(args.maxdisp,args.cuda, num_groups, concat_channels, seg=args.seg)
 else:
     print('no model')
 
@@ -85,12 +96,12 @@ optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999))
 
 
 
-def train(imgL, imgR, disp_L):
+def train(imgL, imgR, disp_L, seg_L):
     model.train()
 
     disp_true = disp_L
     if args.cuda:
-        imgL, imgR, disp_true = imgL.cuda(), imgR.cuda(), disp_L.cuda()
+        imgL, imgR, disp_true, seg_L = imgL.cuda(), imgR.cuda(), disp_L.cuda(), seg_L.cuda()
 
    # ---------
     mask = disp_true < args.maxdisp
@@ -98,14 +109,14 @@ def train(imgL, imgR, disp_L):
     # ----
     optimizer.zero_grad()
 
-    if "seg" in args.model:
-        output = model(imgL, imgR)
-        output = torch.squeeze(output, 1)
-        loss = F.smooth_l1_loss(
-            output[mask], disp_true[mask], size_average=True)
+    # if "seg" in args.model:
+    #     output = model(imgL, imgR)
+    #     output = torch.squeeze(output, 1)
+    #     loss = F.smooth_l1_loss(
+    #         output[mask], disp_true[mask], size_average=True)
 
-    elif args.model == 'stackhourglass' or args.model == 'dilated':
-        output1, output2, output3 = model(imgL, imgR)
+    if args.model == 'stackhourglass' or args.model == 'dilated':
+        output1, output2, output3 = model(imgL, imgR, seg_L)
         output1 = torch.squeeze(output1, 1)
         output2 = torch.squeeze(output2, 1)
         output3 = torch.squeeze(output3, 1)
@@ -183,10 +194,10 @@ def main_train():
         adjust_learning_rate(optimizer, epoch)
 
         ## training ##
-        for batch_idx, (imgL_crop, imgR_crop, disp_crop_L) in enumerate(TrainImgLoader):
+        for batch_idx, (imgL_crop, imgR_crop, disp_crop_L, seg_L) in enumerate(TrainImgLoader):
             start_time = time.time()
 
-            loss = train(imgL_crop, imgR_crop, disp_crop_L)
+            loss = train(imgL_crop, imgR_crop, disp_crop_L, seg_L)
             print('Iter %d training loss = %.3f , time = %.2f' %
                   (batch_idx, loss, time.time() - start_time))
             total_train_loss += loss
