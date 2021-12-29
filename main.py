@@ -40,9 +40,9 @@ parser.add_argument('--batchsize', type=int, default=2,
                     help='batch size')
 parser.add_argument('--numworker', type=int, default=0,
                     help='num_worker')
-parser.add_argument('--seg', type=bool, default=True,
+parser.add_argument('--seg', action='store_true', default=False,
                     help='Whether add segmentation')
-parser.add_argument('--gwc', type=bool, default=True,
+parser.add_argument('--gwc', action='store_true', default=False,
                     help='Whether use group wise cost volume')
 parser.add_argument('--startepoch', type=int, default=0,
                     help='start from epoch')
