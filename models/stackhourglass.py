@@ -128,9 +128,9 @@ class PSMNet(nn.Module):
             volume_seg = refimg_fea.new_zeros([B, 1, self.maxdisp // 4, H, W])
             for i in range(self.maxdisp // 4):
                 if i > 0:
-                    volume_seg[:, 0, i, :, i:] = seg_downsample[:, :,:, i:]
+                    volume_seg[:, :, i, :, i:] = seg_downsample[:, :,:, i:]
                 else:
-                    volume_seg[:, 0, i, :, :] = seg_downsample
+                    volume_seg[:, :, i, :, :] = seg_downsample.view()
             volume_seg = volume_seg.contiguous()
 
 
