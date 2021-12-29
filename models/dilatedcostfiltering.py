@@ -58,7 +58,7 @@ class PSMNet(nn.Module):
 
         self.feature_extraction = feature_extraction(self.concat_channels)
 
-        self.layer37_38 = nn.Sequential(convbn_3d(self.num_groups + self.concat_channels*2, 32, 3, 1, 1),
+        self.layer37_38 = nn.Sequential(convbn_3d(self.num_groups + self.concat_channels*2 + self.seg, 32, 3, 1, 1),
                                      nn.ReLU(inplace=True),
                                      convbn_3d(32, 32, 3, 1, 1),
                                      nn.ReLU(inplace=True))
@@ -79,14 +79,6 @@ class PSMNet(nn.Module):
         self.classif3 = nn.Sequential(convbn_3d(32, 32, 3, 1, 1),
                                       nn.ReLU(inplace=True),
                                       nn.Conv3d(32, 1, kernel_size=3, padding=1, stride=1,bias=False))
-
-        self.final_conv = nn.Sequential(convbn(2,8,3,1,1,1),
-                                        nn.ReLU(inplace=True),
-                                        convbn(8,8,3,1,1,1),
-                                        nn.ReLU(inplace=True),
-                                        convbn(8,8,3,1,1,1),
-                                        nn.ReLU(inplace=True),
-                                        nn.Conv2d(8,1,3,1,1,1))
 
 
         for m in self.modules():
@@ -111,13 +103,31 @@ class PSMNet(nn.Module):
         refimg_fea, refimg_fea_gwc = self.feature_extraction(left)
         targetimg_fea, targetimg_fea_gwc = self.feature_extraction(right)
 
+        if self.seg:
+            seg_downsample = F.interpolate(seg,scale_factor=0.25)
+            B, C, H, W = refimg_fea.shape
+            volume_seg = refimg_fea.new_zeros([B, 1, self.maxdisp // 4, H, W])
+            for i in range(self.maxdisp // 4):
+                if i > 0:
+                    volume_seg[:, 0, i, :, i:] = seg_downsample[:, :,:, i:]
+                else:
+                    volume_seg[:, 0, i, :, :] = seg_downsample
+            volume_seg = volume_seg.contiguous()
+
+
         if self.num_groups == 0:
             concat_volume = build_concat_volume(refimg_fea, targetimg_fea, self.maxdisp // 4)
-            volume = concat_volume
+            if self.seg:
+                volume = torch.cat((concat_volume, volume_seg), 1)
+            else:
+                volume = concat_volume
         else:
             gwc_volume = build_gwc_volume(refimg_fea_gwc, targetimg_fea_gwc, self.maxdisp // 4, self.num_groups)
             concat_volume = build_concat_volume(refimg_fea, targetimg_fea, self.maxdisp // 4)
-            volume = torch.cat((gwc_volume, concat_volume), 1)
+            if self.seg:
+                volume = torch.cat((gwc_volume, concat_volume, volume_seg), 1)
+            else:
+                volume = torch.cat((gwc_volume, concat_volume), 1)
 
         layer38_out = self.layer37_38(volume)
         B,C,H,W,D = layer38_out.shape
@@ -155,16 +165,7 @@ class PSMNet(nn.Module):
         pred3 = disparityregression(self.maxdisp,self.gpu)(pred3)
 
         if self.training:
-            if self.seg==False:
-                return pred1, pred2, pred3
-            else:
-                pred1 = self.final_conv(torch.cat((pred1, seg), 1))
-                pred2 = self.final_conv(torch.cat((pred2, seg), 1))
-                pred3 = self.final_conv(torch.cat((pred3, seg), 1))
-                return pred1, pred2, pred3
+            return pred1, pred2, pred3
         else:
-            if self.seg == False:
-                return pred3
-            else:
-                pred3 = self.final_conv(torch.cat((pred3, seg), 1))
-                return pred3
+            return pred3
+
