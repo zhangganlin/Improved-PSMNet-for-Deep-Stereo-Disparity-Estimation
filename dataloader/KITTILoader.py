@@ -70,6 +70,7 @@ class myImageFloder(data.Dataset):
 
            left_img = left_img.crop((w-1232, h-368, w, h))
            right_img = right_img.crop((w-1232, h-368, w, h))
+           seg_img = seg_img.crop((w-1232, h-368, w, h)) 
            w1, h1 = left_img.size
 
            dataL = dataL.crop((w-1232, h-368, w, h))
