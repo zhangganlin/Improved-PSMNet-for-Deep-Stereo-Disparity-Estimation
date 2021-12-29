@@ -130,7 +130,7 @@ class PSMNet(nn.Module):
                 if i > 0:
                     volume_seg[:, :, i, :, i:] = seg_downsample[:, :,:, i:]
                 else:
-                    volume_seg[:, :, i, :, :] = seg_downsample.view()
+                    volume_seg[:, :, i, :, :] = seg_downsample[:, :,:, i:]
             volume_seg = volume_seg.contiguous()
 
 
