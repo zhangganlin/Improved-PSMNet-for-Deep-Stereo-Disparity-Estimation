@@ -224,12 +224,12 @@ def main_train():
         loss_to_write.write("{}\n".format(total_train_loss/len(TrainImgLoader)))
 
         # SAVE
-        savefilename = args.savemodel+'/checkpoint_'+str(epoch)+'.tar'
-        torch.save({
-            'epoch': epoch,
-            'state_dict': model.state_dict(),
-            'train_loss': total_train_loss/len(TrainImgLoader),
-        }, savefilename)
+    savefilename = args.savemodel+'/checkpoint_'+str(epoch)+'.tar'
+    torch.save({
+        'epoch': epoch,
+        'state_dict': model.state_dict(),
+        'train_loss': total_train_loss/len(TrainImgLoader),
+    }, savefilename)
 
     print('full training time = %.2f HR' %
           ((time.time() - start_full_time)/3600))
