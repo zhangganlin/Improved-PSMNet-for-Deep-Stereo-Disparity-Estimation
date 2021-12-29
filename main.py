@@ -185,17 +185,22 @@ def adjust_learning_rate(optimizer, epoch):
 
 
 def main_train():
+    
     if args.startepoch != 0:
-        loss_to_write = open(args.savemodel+"/"+str(args.startepoch)+"loss.txt","w")
+        loss_to_write_file_name = args.savemodel+"/"+str(args.startepoch)+"loss.txt"
     else:   
-        loss_to_write = open(args.savemodel+"/loss.txt","w")
-
+        loss_to_write_file_name =args.savemodel+"/loss.txt"
+    loss_to_write = open(loss_to_write_file_name,"w")
 
     start_full_time = time.time()
     for epoch in range(args.startepoch, args.startepoch+args.epochs):
         print('This is %d-th epoch' % (epoch))
         total_train_loss = 0
         adjust_learning_rate(optimizer, epoch)
+        
+        if epoch%20 == 0:
+            loss_to_write.close()
+            loss_to_write = open(loss_to_write_file_name,"a")
 
         ## training ##
         for batch_idx, (imgL_crop, imgR_crop, disp_crop_L, seg_L) in enumerate(TrainImgLoader):
