@@ -76,12 +76,17 @@ else:
 
 if args.model == 'stackhourglass':
     model = stackhourglass(args.maxdisp,args.cuda, num_groups, concat_channels, seg=args.seg)
+    model_name = 'psm'
 elif args.model == 'dilated':
     model = dilated(args.maxdisp,args.cuda, num_groups, concat_channels, seg=args.seg)
+    model_name = 'dilated'
 else:
     print('no model')
 
-
+if args.gwc:
+    model_name = model_name+"_gwc"
+if args.seg:
+    model_name = model_name+"_seg"
 
 if args.cuda:
     model = nn.DataParallel(model)
@@ -181,7 +186,7 @@ def adjust_learning_rate(optimizer, epoch):
 def main_train():
     
     if args.startepoch != 0:
-        loss_to_write_file_name = args.savemodel+"/"+str(args.startepoch)+"kittiloss.txt"
+        loss_to_write_file_name = args.savemodel+"/"+str(args.startepoch)+model_name+"_kittiloss.txt"
     else:   
         loss_to_write_file_name =args.savemodel+"/kittiloss.txt"
     loss_to_write = open(loss_to_write_file_name,"w")
@@ -210,7 +215,7 @@ def main_train():
         loss_to_write.write("{}\n".format(total_train_loss/len(TrainImgLoader)))
 
         # SAVE
-    savefilename = args.savemodel+'/kitticheckpoint_'+str(epoch)+'.tar'
+    savefilename = args.savemodel+'/kitticheckpoint_'+str(epoch)+model_name+'.tar'
     torch.save({
         'epoch': epoch,
         'state_dict': model.state_dict(),
