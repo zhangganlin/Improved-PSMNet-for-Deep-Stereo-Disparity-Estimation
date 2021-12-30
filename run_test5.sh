@@ -2,13 +2,14 @@
 
 python main.py --maxdisp 192 \
                --model dilated \
-               --datapath /cluster/scratch/zhangga/dataset/ \
+               --datapath /cluster/scratch/xishen/dataset/ \
                --epochs 30 \
-               --savemodel /cluster/scratch/zhangga/trained/dilated/ \
-               --loadmodel /cluster/scratch/zhangga/trained/dilated/checkpoint_49.tar \
+               --savemodel /cluster/scratch/xishen/trained/dilated_seg/ \
+               --loadmodel /cluster/scratch/xishen/trained/dilated_seg/checkpoint_49.tar \
                --batchsize 8 \
                --numworker 4 \
                --startepoch 50 \
+               --seg \
                
              
                
