@@ -237,5 +237,5 @@ def main_test():
     loss_to_write = open(loss_to_write_file_name,"a")
     loss_to_write.write("test_loss: {}\n".format(total_test_loss/len(TestImgLoader)))
 if __name__ == '__main__':
-        main_test()
         main_train()
+        main_test()
