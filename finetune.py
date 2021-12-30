@@ -233,14 +233,9 @@ def main_test():
     print('total test loss = %.3f' % (total_test_loss/len(TestImgLoader)))
     # ----------------------------------------------------------------------------------
     # SAVE test information
-    savefilename = args.savemodel+'testinformation.tar'
-    torch.save({
-        'test_loss': total_test_loss/len(TestImgLoader),
-    }, savefilename)
-
-
+    loss_to_write_file_name =args.savemodel+"/kittiloss.txt"
+    loss_to_write = open(loss_to_write_file_name,"a")
+    loss_to_write.write("test_loss: {}\n".format(total_test_loss/len(TestImgLoader)))
 if __name__ == '__main__':
-    if args.test:
         main_test()
-    else:
         main_train()
