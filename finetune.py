@@ -135,9 +135,13 @@ def train(imgL, imgR, disp_L, seg_L):
 def test(imgL, imgR, disp_true, seg_L):
 
     model.eval()
+    imgL   = Variable(torch.FloatTensor(imgL))
+    imgR   = Variable(torch.FloatTensor(imgR))
+    seg_L  = Variable(torch.FloatTensor(seg_L))
+
 
     if args.cuda:
-        imgL, imgR, disp_true, seg_L = imgL.cuda(), imgR.cuda(), disp_true.cuda(), seg_L.cuda()
+        imgL, imgR, seg_L = imgL.cuda(), imgR.cuda(), seg_L.cuda()
     # ---------
 
 
