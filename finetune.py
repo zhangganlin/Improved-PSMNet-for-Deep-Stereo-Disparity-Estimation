@@ -14,7 +14,7 @@ from dataloader import listflowfile as lt
 from dataloader import SecenFlowLoader as DA
 from dataloader import KITTIloader2015 as kitti2015
 from dataloader import KITTILoader as kittiDA
-
+import copy
 from models import *
 
 parser = argparse.ArgumentParser(description='PSMNet')
@@ -113,7 +113,7 @@ def train(imgL, imgR, disp_L, seg_L):
         imgL, imgR, disp_true, seg_L = imgL.cuda(), imgR.cuda(), disp_L.cuda(), seg_L.cuda()
 
    # ---------
-    mask = disp_true < args.maxdisp
+    mask = disp_true > 0
     mask.detach_()
     # ----
     optimizer.zero_grad()
@@ -139,41 +139,21 @@ def test(imgL, imgR, disp_true, seg_L):
     if args.cuda:
         imgL, imgR, disp_true, seg_L = imgL.cuda(), imgR.cuda(), disp_true.cuda(), seg_L.cuda()
     # ---------
-    mask = disp_true < 192
-    # ----
 
-    if imgL.shape[2] % 16 != 0:
-        times = imgL.shape[2]//16
-        top_pad = (times+1)*16 - imgL.shape[2]
-    else:
-        top_pad = 0
-
-    if imgL.shape[3] % 16 != 0:
-        times = imgL.shape[3]//16
-        right_pad = (times+1)*16-imgL.shape[3]
-    else:
-        right_pad = 0
-
-    imgL = F.pad(imgL, (0, right_pad, top_pad, 0))
-    imgR = F.pad(imgR, (0, right_pad, top_pad, 0))
-    seg_L = F.pad(seg_L, (0, right_pad, top_pad, 0) )
 
     with torch.no_grad():
         output3 = model(imgL, imgR, seg_L)
         output3 = torch.squeeze(output3)
 
-    if top_pad != 0:
-        img = output3[:, top_pad:, :]
-    else:
-        img = output3
+    pred_disp = output3.data.cpu()
 
-    if len(disp_true[mask]) == 0:
-        loss = 0
-    else:
-        # torch.mean(torch.abs(img[mask]-disp_true[mask]))  # end-point-error
-        loss = F.l1_loss(img[mask], disp_true[mask])
+    true_disp = copy.deepcopy(disp_true)
+    index = np.argwhere(true_disp>0)
+    disp_true[index[0][:], index[1][:], index[2][:]] = np.abs(true_disp[index[0][:], index[1][:], index[2][:]]-pred_disp[index[0][:], index[1][:], index[2][:]])
+    correct = (disp_true[index[0][:], index[1][:], index[2][:]] < 3)|(disp_true[index[0][:], index[1][:], index[2][:]] < true_disp[index[0][:], index[1][:], index[2][:]]*0.05)      
+    torch.cuda.empty_cache()
 
-    return loss.data.cpu()
+    return 1-(float(torch.sum(correct))/float(len(index[0])))
 
 
 def adjust_learning_rate(optimizer, epoch):
@@ -242,7 +222,7 @@ def main_test():
     if args.startepoch ==0:
         loss_to_write_file_name = args.savemodel+"/"+model_name+"_kittiloss.txt"
     else:
-        loss_to_write_file_name = args.savemodel+"/"+str(args.startepoch)+model_name+"_kittiloss.txt"
+        loss_to_write_file_name = args.savemodel+"/"+str(args.startepoch)+model_name+"_kittiloss.txt" 
     loss_to_write = open(loss_to_write_file_name,"a")
     loss_to_write.write("test_loss: {}\n".format(total_test_loss/len(TestImgLoader)))
 if __name__ == '__main__':
