@@ -1,6 +1,6 @@
 #!/bin/bash
 
-python main.py --maxdisp 192 \
+python finetune.py --maxdisp 192 \
                --model stackhourglass \
                --datapath /cluster/scratch/zhangga/dataset/ \
                --epochs 50 \
