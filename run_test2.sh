@@ -5,7 +5,7 @@ python finetune.py --maxdisp 192 \
                --datapath /cluster/scratch/zhangga/dataset/ \
                --epochs 50 \
                --savemodel /cluster/scratch/zhangga/finetune \
-               --loadmodel /cluster/scratch/zhangga/trained/seg/checkpoint_79.tar \
+               --loadmodel /cluster/scratch/zhangga/trained/seg/checkpoint_49.tar \
                --batchsize 8 \
                --numworker 4 \
                --startepoch 0 \

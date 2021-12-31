@@ -184,8 +184,10 @@ def adjust_learning_rate(optimizer, epoch):
 
 
 def main_train():
-    
-    loss_to_write_file_name = args.savemodel+"/"+model_name+"_kittiloss.txt"
+    if args.startepoch ==0:
+        loss_to_write_file_name = args.savemodel+"/"+model_name+"_kittiloss.txt"
+    else:
+        loss_to_write_file_name = args.savemodel+"/"+str(args.startepoch)+model_name+"_kittiloss.txt"
     loss_to_write = open(loss_to_write_file_name,"w")
 
     print(loss_to_write_file_name)
@@ -237,7 +239,10 @@ def main_test():
     print('total test loss = %.3f' % (total_test_loss/len(TestImgLoader)))
     # ----------------------------------------------------------------------------------
     # SAVE test information
-    loss_to_write_file_name = args.savemodel+"/"+model_name+"_kittiloss.txt"
+    if args.startepoch ==0:
+        loss_to_write_file_name = args.savemodel+"/"+model_name+"_kittiloss.txt"
+    else:
+        loss_to_write_file_name = args.savemodel+"/"+str(args.startepoch)+model_name+"_kittiloss.txt"
     loss_to_write = open(loss_to_write_file_name,"a")
     loss_to_write.write("test_loss: {}\n".format(total_test_loss/len(TestImgLoader)))
 if __name__ == '__main__':
