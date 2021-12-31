@@ -3,12 +3,12 @@
 python main.py --maxdisp 192 \
                --model dilated \
                --datapath /cluster/scratch/zhangga/dataset/ \
-               --epochs 30 \
-               --savemodel /cluster/scratch/zhangga/trained/dilated/ \
-               --loadmodel /cluster/scratch/zhangga/trained/dilated/checkpoint_49.tar \
+               --epochs 50 \
+               --savemodel /cluster/scratch/zhangga/finetune/ \
+               --loadmodel /cluster/scratch/zhangga/trained/dilated/checkpoint_79.tar \
                --batchsize 8 \
                --numworker 4 \
-               --startepoch 50 \
+               --startepoch 0 \
                
              
                
