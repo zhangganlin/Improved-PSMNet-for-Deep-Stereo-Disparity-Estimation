@@ -188,7 +188,7 @@ def main_train():
     if args.startepoch != 0:
         loss_to_write_file_name = args.savemodel+"/"+str(args.startepoch)+model_name+"_kittiloss.txt"
     else:   
-        loss_to_write_file_name =args.savemodel+"/kittiloss.txt"
+        loss_to_write_file_name =args.savemodel+"/"+str(args.startepoch)+model_name+"_kittiloss.txt"
     loss_to_write = open(loss_to_write_file_name,"w")
 
     start_full_time = time.time()
