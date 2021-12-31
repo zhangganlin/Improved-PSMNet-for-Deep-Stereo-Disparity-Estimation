@@ -161,7 +161,10 @@ def test(imgL, imgR, disp_true, seg_L):
 
 
 def adjust_learning_rate(optimizer, epoch):
-    lr = 0.001
+    if epoch <= 200:
+       lr = 0.001
+    else:
+       lr = 0.0001
     print(lr)
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr

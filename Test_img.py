@@ -16,24 +16,41 @@ from PIL import Image
 # 2012 data /media/jiaren/ImageNet/data_scene_flow_2012/testing/
 
 parser = argparse.ArgumentParser(description='PSMNet')
-parser.add_argument('--KITTI', default='2015',
-                    help='KITTI version')
-parser.add_argument('--datapath', default='/media/jiaren/ImageNet/data_scene_flow_2015/testing/',
+parser.add_argument('--maxdisp', type=int, default=192,
+                    help='maxium disparity')
+parser.add_argument('--model', default='stackhourglass',
                     help='select model')
-parser.add_argument('--loadmodel', default='./trained/pretrained_model_KITTI2015.tar',
-                    help='loading model')
+parser.add_argument('--datapath', default='/media/jiaren/ImageNet/SceneFlowData/',
+                    help='datapath')
+parser.add_argument('--kittidatapath', default='dataset/data_scene_flow_2015/training/',
+                    help='kitti datapath')
+parser.add_argument('--epochs', type=int, default=50,
+                    help='number of epochs to train')
+parser.add_argument('--loadmodel', default=None,
+                    help='load model')
+parser.add_argument('--savemodel', default='./',
+                    help='save model')
+parser.add_argument('--no-cuda', action='store_true', default=False,
+                    help='enables no CUDA training')
+parser.add_argument('--seed', type=int, default=1, metavar='S',
+                    help='random seed (default: 1)')
+parser.add_argument('--batchsize', type=int, default=2,
+                    help='batch size')
+parser.add_argument('--numworker', type=int, default=0,
+                    help='num_worker')
+parser.add_argument('--seg', action='store_true', default=False,
+                    help='Whether add segmentation')
+parser.add_argument('--gwc', action='store_true', default=False,
+                    help='Whether use group wise cost volume')
+
+
 parser.add_argument('--leftimg', default= './VO04_L.png',
                     help='load model')
 parser.add_argument('--rightimg', default= './VO04_R.png',
-                    help='load model')                                      
-parser.add_argument('--model', default='stackhourglass',
-                    help='select model')
-parser.add_argument('--maxdisp', type=int, default=192,
-                    help='maxium disparity')
-parser.add_argument('--no-cuda', action='store_true', default=False,
-                    help='enables CUDA training')
-parser.add_argument('--seed', type=int, default=1, metavar='S',
-                    help='random seed (default: 1)')
+                    help='load model')  
+parser.add_argument('--segimg', default= './VO04_L.png',
+                    help='load model')
+
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 
@@ -41,32 +58,59 @@ torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
+if args.gwc:
+    num_groups = 40
+    concat_channels=12
+else:
+    num_groups = 0
+    concat_channels = 32
+
+
 if args.model == 'stackhourglass':
-    model = stackhourglass(args.maxdisp)
-elif args.model == 'basic':
-    model = basic(args.maxdisp)
+    model = stackhourglass(args.maxdisp,args.cuda, num_groups, concat_channels, seg=args.seg)
+    model_name = 'psm'
+elif args.model == 'dilated':
+    model = dilated(args.maxdisp,args.cuda, num_groups, concat_channels, seg=args.seg)
+    model_name = 'dilated'
 else:
     print('no model')
 
-model = nn.DataParallel(model, device_ids=[0])
-model.cuda()
+if args.gwc:
+    model_name = model_name+"_gwc"
+if args.seg:
+    model_name = model_name+"_seg"
+
+if args.cuda:
+    model = nn.DataParallel(model)
+    model.cuda()
 
 if args.loadmodel is not None:
-    print('load PSMNet')
-    state_dict = torch.load(args.loadmodel)
-    model.load_state_dict(state_dict['state_dict'])
+    print('Load pretrained model')
+    if args.no_cuda:
+        pretrain_dict = torch.load(args.loadmodel,map_location=torch.device('cpu'))['state_dict']
+        from collections import OrderedDict
+        new_state_dict = OrderedDict()
+        for k, v in pretrain_dict.items():
+            name = k[7:] # remove 'module.'
+            new_state_dict[name] = v
+        model.load_state_dict(new_state_dict)
+    else:
+        pretrain_dict = torch.load(args.loadmodel)
+        model.load_state_dict(pretrain_dict['state_dict'])
+
 
 print('Number of model parameters: {}'.format(sum([p.data.nelement() for p in model.parameters()])))
 
-def test(imgL,imgR):
+def test(imgL,imgR,imgSeg):
         model.eval()
 
         if args.cuda:
            imgL = imgL.cuda()
            imgR = imgR.cuda()     
+           imgSeg = imgSeg.cuda() 
 
         with torch.no_grad():
-            disp = model(imgL,imgR)
+            disp = model(imgL,imgR,imgSeg)
 
         disp = torch.squeeze(disp)
         pred_disp = disp.data.cpu().numpy()
@@ -83,9 +127,12 @@ def main():
 
         imgL_o = Image.open(args.leftimg).convert('RGB')
         imgR_o = Image.open(args.rightimg).convert('RGB')
+        imgSeg_o = Image.open(args.segimg)
+
 
         imgL = infer_transform(imgL_o)
         imgR = infer_transform(imgR_o) 
+        imgSeg = transforms.ToTensor()(imgSeg_o)
        
 
         # pad to width and hight to 16 times
@@ -103,9 +150,10 @@ def main():
 
         imgL = F.pad(imgL,(0,right_pad, top_pad,0)).unsqueeze(0)
         imgR = F.pad(imgR,(0,right_pad, top_pad,0)).unsqueeze(0)
+        imgSeg = F.pad(imgSeg,(0,right_pad, top_pad,0)).unsqueeze(0)
 
         start_time = time.time()
-        pred_disp = test(imgL,imgR)
+        pred_disp = test(imgL,imgR,imgSeg)
         print('time = %.2f' %(time.time() - start_time))
 
         

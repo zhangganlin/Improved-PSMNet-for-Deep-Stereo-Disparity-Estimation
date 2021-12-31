@@ -1,10 +1,12 @@
 #!/bin/bash
 
-python Test_img.py --loadmodel ./trained/new_psm/checkpoint_49.tar \
-                   --model stackhourglass \
+python Test_img.py --loadmodel ./trained/dilated_gwc_seg/checkpoint_49.tar \
+                   --model dilated \
                    --maxdisp 192 \
                    --leftimg dataset/data_scene_flow_2015/training/image_2/000006_10.png \
                    --rightimg dataset/data_scene_flow_2015/training/image_3/000006_10.png \
                    --segimg dataset/data_scene_flow_2015/training/seg/000006_10.png \
-                   --no-cuda
+                   --no-cuda \
+                   --gwc \
+                   --seg
                
