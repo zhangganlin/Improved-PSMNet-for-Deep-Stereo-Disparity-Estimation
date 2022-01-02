@@ -15,35 +15,21 @@ from PIL import Image
 
 # 2012 data /media/jiaren/ImageNet/data_scene_flow_2012/testing/
 
-parser = argparse.ArgumentParser(description='PSMNet')
+parser = argparse.ArgumentParser(description='ImprovedPSMNet')
 parser.add_argument('--maxdisp', type=int, default=192,
                     help='maxium disparity')
 parser.add_argument('--model', default='stackhourglass',
-                    help='select model')
-parser.add_argument('--datapath', default='/media/jiaren/ImageNet/SceneFlowData/',
-                    help='datapath')
-parser.add_argument('--kittidatapath', default='dataset/data_scene_flow_2015/training/',
-                    help='kitti datapath')
-parser.add_argument('--epochs', type=int, default=50,
-                    help='number of epochs to train')
+                    help="select model 'stackhourglass' or 'dilated'")
 parser.add_argument('--loadmodel', default=None,
                     help='load model')
-parser.add_argument('--savemodel', default='./',
-                    help='save model')
 parser.add_argument('--no-cuda', action='store_true', default=False,
                     help='enables no CUDA training')
 parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
-parser.add_argument('--batchsize', type=int, default=2,
-                    help='batch size')
-parser.add_argument('--numworker', type=int, default=0,
-                    help='num_worker')
 parser.add_argument('--seg', action='store_true', default=False,
                     help='Whether add segmentation')
 parser.add_argument('--gwc', action='store_true', default=False,
                     help='Whether use group wise cost volume')
-
-
 parser.add_argument('--leftimg', default= './VO04_L.png',
                     help='load model')
 parser.add_argument('--rightimg', default= './VO04_R.png',

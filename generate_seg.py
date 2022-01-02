@@ -169,13 +169,10 @@ def generate_seg(src_folder, save_folder, ext):
 
 
 src_folder_kitti15 = args.kitti15+"/image_2"
-src_folder_kitti12 = args.kitti12+"/colored_0"
 
 result_folder_kitti15 = args.kitti15+"/seg"
-result_folder_kitti12 = args.kitti12+"/seg"
 
-# generate_seg(src_folder_kitti15, result_folder_kitti15, ".png")
-# generate_seg(src_folder_kitti12, result_folder_kitti12, ".png")
+generate_seg(src_folder_kitti15, result_folder_kitti15, ".png")
 
 
 subdir1 = ['35mm_focallength']

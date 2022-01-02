@@ -21,9 +21,9 @@ parser = argparse.ArgumentParser(description='PSMNet')
 parser.add_argument('--maxdisp', type=int, default=192,
                     help='maxium disparity')
 parser.add_argument('--model', default='stackhourglass',
-                    help='select model')
-parser.add_argument('--datapath', default='/media/jiaren/ImageNet/SceneFlowData/',
-                    help='datapath')
+                    help="select model 'stackhourglass' or 'dilated'")
+parser.add_argument('--datapath', default='SceneFlowData/',
+                    help='scene flow datapath')
 parser.add_argument('--kittidatapath', default='dataset/data_scene_flow_2015/training/',
                     help='kitti datapath')
 parser.add_argument('--epochs', type=int, default=10,
@@ -46,8 +46,7 @@ parser.add_argument('--gwc', action='store_true', default=False,
                     help='Whether use group wise cost volume')
 parser.add_argument('--startepoch', type=int, default=0,
                     help='start from epoch')
-parser.add_argument('--test', action='store_true', default=False,
-                    help='enables testing')
+
 
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
@@ -94,8 +93,17 @@ if args.cuda:
 
 if args.loadmodel is not None:
     print('Load pretrained model')
-    pretrain_dict = torch.load(args.loadmodel)
-    model.load_state_dict(pretrain_dict['state_dict'])
+    if args.no_cuda:
+        pretrain_dict = torch.load(args.loadmodel,map_location=torch.device('cpu'))['state_dict']
+        from collections import OrderedDict
+        new_state_dict = OrderedDict()
+        for k, v in pretrain_dict.items():
+            name = k[7:] # remove 'module.'
+            new_state_dict[name] = v
+        model.load_state_dict(new_state_dict)
+    else:
+        pretrain_dict = torch.load(args.loadmodel)
+        model.load_state_dict(pretrain_dict['state_dict'])
 
 print('Number of model parameters: {}'.format(
     sum([p.data.nelement() for p in model.parameters()])))
@@ -245,7 +253,5 @@ def main_test():
 
 
 if __name__ == '__main__':
-    if args.test:
-        main_test()
-    else:
-        main_train()
+    main_train()
+    main_test()
