@@ -1,6 +1,11 @@
 MIT License
 
-Copyright for portions of project Improved-PSMNet are held by [Jia-Ren Chang, 2018] as part of project PSMNet. Copyright for portions of project Improved-PSMNet are held by [MIT CSAIL Computer Vision, 2019] as part of project semantic-segmentation-pytorch.  All other copyright for project Improved-PSMNet are held by [Ganlin Zhang, Haokai Pang, Xinyu Shen, Yunying Zhu, 2022].
+Copyright for portions of project Improved-PSMNet are held by 
+[Jia-Ren Chang, 2018] as part of project PSMNet. Copyright for portions of 
+project Improved-PSMNet are held by [MIT CSAIL Computer Vision, 2019] as part
+of project semantic-segmentation-pytorch.  All other copyright for project 
+Improved-PSMNet are held by 
+[Ganlin Zhang, Haokai Pang, Xinyu Shen, Yunying Zhu, 2022].
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
