@@ -31,11 +31,11 @@ parser.add_argument('--seg', action='store_true', default=False,
 parser.add_argument('--gwc', action='store_true', default=False,
                     help='Whether use group wise cost volume')
 parser.add_argument('--leftimg', default= './VO04_L.png',
-                    help='load model')
+                    help='left image')
 parser.add_argument('--rightimg', default= './VO04_R.png',
-                    help='load model')  
+                    help='right image')  
 parser.add_argument('--segimg', default= './VO04_L.png',
-                    help='load model')
+                    help='segmentation image')
 
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()

@@ -30,11 +30,6 @@ parser.add_argument(
     default="dataset/data_scene_flow_2015/training",
     type=str
 )
-parser.add_argument(
-    "--kitti12",
-    default="dataset/data_stereo_flow_2012/training",
-    type=str,
-)
 
 parser.add_argument(
     "--driving",
@@ -46,7 +41,7 @@ parser.add_argument(
     "--gpu",
     default=0,
     type=int,
-    help="gpu id for evaluation"
+    help="gpu id for evaluation, set to -1 to not use gpu"
 )
 
 args = parser.parse_args()
