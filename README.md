@@ -2,7 +2,9 @@
 
 This is the code repository of Improved-PSMNet.
 
-Authors: Ganlin Zhang ([@zhangganlin](https://github.com/zhangganlin)) Haokai Pang ([@ethhapang](https://github.com/ethhapang)) Xinyu Shen([@ucabxs0](https://github.com/ucabxs0)) Yunying Zhu([@yunyingzhu](https://github.com/yunyingzhu))
+Authors: 
+
+Ganlin Zhang ([@zhangganlin](https://github.com/zhangganlin)) Haokai Pang ([@ethhapang](https://github.com/ethhapang)) Xinyu Shen([@ucabxs0](https://github.com/ucabxs0)) Yunying Zhu([@yunyingzhu](https://github.com/yunyingzhu))
 
 ---
 ## Structure
