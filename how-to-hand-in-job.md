@@ -4,7 +4,7 @@ Detailed tutorial can be found here: [https://scicomp.ethz.ch/wiki/Getting_start
 ## Basic command
 ---
 ```
-bsub -n 4-R "rusage[mem=6000,ngpus_excl_p=4]" -W 5:00 bash test.sh 
+bsub -n 4 -R "rusage[mem=7000,ngpus_excl_p=4]" -W 5:00 bash test.sh 
 ```
 ```-n 4``` is the number of cpu
 
