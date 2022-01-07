@@ -1,6 +1,8 @@
 # Improved PSMNet for Deep Stereo Disparity Estimation
 
-This is the code repository of Improved-PSMNet. Implemented by PyTorch.
+This is the code repository of Improved-PSMNet. Implemented by PyTorch. 
+
+See our [project report](./Improved-PSMNet-for-Deep-Stereo-Disparity-Estimation.pdf) for details.
 
 Authors: 
 
