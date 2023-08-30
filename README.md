@@ -6,7 +6,7 @@ See our [project report](./Improved-PSMNet-for-Deep-Stereo-Disparity-Estimation.
 
 Authors: 
 
-Ganlin Zhang ([@zhangganlin](https://github.com/zhangganlin)) Haokai Pang ([@ethhapang](https://github.com/ethhapang)) Xinyu Shen([@ucabxs0](https://github.com/ucabxs0)) Yunying Zhu([@yunyingzhu](https://github.com/yunyingzhu))
+[Ganlin Zhang](https://zhangganlin.github.io) ([@zhangganlin](https://github.com/zhangganlin)) Haokai Pang ([@hkkkpang](https://github.com/hkkkpang)) Xinyu Shen([@ucabxs0](https://github.com/ucabxs0)) Yunying Zhu([@yunyingzhu](https://github.com/yunyingzhu))
 
 ---
 ## Structure
